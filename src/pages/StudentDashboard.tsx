@@ -20,7 +20,11 @@ const StudentDashboard = () => {
   const progress = calculateAcademicProgress();
   const currentCourses = getCurrentCourses();
   const upcomingCourses = getUpcomingCourses();
-  const upcomingEvents = getUpcomingEvents();
+  // Fix the type issue by explicitly specifying the event type as a valid value
+  const upcomingEvents = getUpcomingEvents().map(event => ({
+    ...event,
+    type: event.type as "class" | "advising" | "deadline"
+  }));
   const announcements = getRecentAnnouncements();
 
   return (
@@ -89,8 +93,8 @@ const StudentDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="col-span-1 md:col-span-2">
           <Tabs defaultValue="current">
-            <div className="flex justify-between items-center mb-4">
-              <TabsList>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+              <TabsList className="mb-2 sm:mb-0">
                 <TabsTrigger value="current">Current Courses</TabsTrigger>
                 <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
               </TabsList>
@@ -100,7 +104,7 @@ const StudentDashboard = () => {
               </Button>
             </div>
             <TabsContent value="current" className="pt-2">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {currentCourses.map((course) => (
                   <CourseCard
                     key={course.id}
@@ -115,7 +119,7 @@ const StudentDashboard = () => {
               </div>
             </TabsContent>
             <TabsContent value="upcoming" className="pt-2">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {upcomingCourses.map((course) => (
                   <CourseCard
                     key={course.id}
@@ -138,7 +142,7 @@ const StudentDashboard = () => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Current GPA</CardTitle>

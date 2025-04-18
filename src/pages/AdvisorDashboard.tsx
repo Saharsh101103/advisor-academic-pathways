@@ -68,7 +68,10 @@ const studentAdvisingData = [
 ];
 
 const AdvisorDashboard = () => {
-  const upcomingEvents = getUpcomingEvents();
+  const upcomingEvents = getUpcomingEvents().map(event => ({
+    ...event,
+    type: event.type as "class" | "advising" | "deadline"
+  }));
   const announcements = getRecentAnnouncements();
 
   return (
@@ -80,7 +83,7 @@ const AdvisorDashboard = () => {
             {advisorData.department} Department • {advisorData.students.length} Advisees
           </p>
         </div>
-        <div className="flex gap-2 mt-4 md:mt-0">
+        <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
           <Button>
             <CalendarIcon className="mr-2 h-4 w-4" />
             Office Hours
@@ -93,8 +96,8 @@ const AdvisorDashboard = () => {
       </div>
 
       {/* Advising Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="col-span-1 md:col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="col-span-1 lg:col-span-2">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Student Advising Status</CardTitle>
             <CardDescription>
@@ -103,20 +106,20 @@ const AdvisorDashboard = () => {
           </CardHeader>
           <CardContent className="pt-2">
             <Tabs defaultValue="pending">
-              <TabsList className="mb-4">
-                <TabsTrigger value="pending">
+              <TabsList className="mb-4 flex overflow-x-auto pb-1">
+                <TabsTrigger value="pending" className="whitespace-nowrap">
                   Pending
                   <Badge className="ml-2 bg-yellow-100 text-yellow-800 border-yellow-200" variant="outline">
                     {studentAdvisingData.filter(s => s.advisingStatus === "pending").length}
                   </Badge>
                 </TabsTrigger>
-                <TabsTrigger value="scheduled">
+                <TabsTrigger value="scheduled" className="whitespace-nowrap">
                   Scheduled
                   <Badge className="ml-2 bg-blue-100 text-blue-800 border-blue-200" variant="outline">
                     {studentAdvisingData.filter(s => s.advisingStatus === "scheduled").length}
                   </Badge>
                 </TabsTrigger>
-                <TabsTrigger value="completed">
+                <TabsTrigger value="completed" className="whitespace-nowrap">
                   Completed
                   <Badge className="ml-2 bg-green-100 text-green-800 border-green-200" variant="outline">
                     {studentAdvisingData.filter(s => s.advisingStatus === "completed").length}
@@ -129,7 +132,7 @@ const AdvisorDashboard = () => {
                   {studentAdvisingData
                     .filter(student => student.advisingStatus === "pending")
                     .map(student => (
-                      <div key={student.id} className="flex items-center justify-between p-3 border rounded-md hover:bg-muted/50 transition-colors">
+                      <div key={student.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-md hover:bg-muted/50 transition-colors gap-3">
                         <div className="flex items-center gap-3">
                           <Avatar>
                             <AvatarFallback>{student.name[0]}</AvatarFallback>
@@ -139,7 +142,7 @@ const AdvisorDashboard = () => {
                             <div className="text-sm text-muted-foreground">{student.major} • {student.year}</div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2 mt-2 sm:mt-0">
                           {student.alerts.length > 0 && (
                             <Badge variant="destructive" className="mr-2">
                               {student.alerts.length} {student.alerts.length === 1 ? "Alert" : "Alerts"}
@@ -164,7 +167,7 @@ const AdvisorDashboard = () => {
                   {studentAdvisingData
                     .filter(student => student.advisingStatus === "scheduled")
                     .map(student => (
-                      <div key={student.id} className="flex items-center justify-between p-3 border rounded-md hover:bg-muted/50 transition-colors">
+                      <div key={student.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-md hover:bg-muted/50 transition-colors gap-3">
                         <div className="flex items-center gap-3">
                           <Avatar>
                             <AvatarFallback>{student.name[0]}</AvatarFallback>
@@ -174,8 +177,8 @@ const AdvisorDashboard = () => {
                             <div className="text-sm text-muted-foreground">{student.major} • {student.year}</div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <div className="text-sm text-muted-foreground mr-4">
+                        <div className="flex flex-wrap items-center gap-2 mt-2 sm:mt-0">
+                          <div className="text-sm text-muted-foreground mr-2">
                             <CalendarIcon className="inline-block mr-1 h-3.5 w-3.5" />
                             {student.nextMeeting}
                           </div>
@@ -194,7 +197,7 @@ const AdvisorDashboard = () => {
                   {studentAdvisingData
                     .filter(student => student.advisingStatus === "completed")
                     .map(student => (
-                      <div key={student.id} className="flex items-center justify-between p-3 border rounded-md hover:bg-muted/50 transition-colors">
+                      <div key={student.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-md hover:bg-muted/50 transition-colors gap-3">
                         <div className="flex items-center gap-3">
                           <Avatar>
                             <AvatarFallback>{student.name[0]}</AvatarFallback>
@@ -204,7 +207,7 @@ const AdvisorDashboard = () => {
                             <div className="text-sm text-muted-foreground">{student.major} • {student.year}</div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2 mt-2 sm:mt-0">
                           <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200 mr-2">
                             <CheckIcon className="mr-1 h-3 w-3" />
                             Completed {student.lastMeeting}
@@ -268,7 +271,7 @@ const AdvisorDashboard = () => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Total Students</CardTitle>

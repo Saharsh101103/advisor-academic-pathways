@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -13,9 +13,11 @@ import {
   Settings, 
   Menu, 
   Users, 
-  LogOut 
+  LogOut,
+  ChevronLeft
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type NavItem = {
   title: string;
@@ -80,9 +82,15 @@ interface SidebarProps {
 }
 
 export const Sidebar = ({ userRole }: SidebarProps) => {
-  const [collapsed, setCollapsed] = useState(false);
+  const isMobile = useIsMobile();
+  const [collapsed, setCollapsed] = useState(isMobile);
   const location = useLocation();
   
+  // Update collapsed state when screen size changes
+  useEffect(() => {
+    setCollapsed(isMobile);
+  }, [isMobile]);
+
   // Filter navigation items based on user role
   const filteredNavItems = navItems.filter(item => 
     item.roleAccess.includes(userRole)
@@ -104,9 +112,9 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
           variant="ghost" 
           size="icon" 
           onClick={() => setCollapsed(!collapsed)}
-          className="ml-auto"
+          className={collapsed ? "mx-auto" : "ml-auto"}
         >
-          <Menu className="h-5 w-5" />
+          {collapsed ? <Menu className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
         </Button>
       </div>
       

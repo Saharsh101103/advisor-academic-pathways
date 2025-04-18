@@ -1,5 +1,5 @@
 
-import { Bell, Moon, Search, Sun } from "lucide-react";
+import { Bell, Menu, Moon, Search, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface HeaderProps {
   userName: string;
@@ -21,6 +22,7 @@ interface HeaderProps {
 
 export const Header = ({ userName, userRole, userInitials }: HeaderProps) => {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const isMobile = useIsMobile();
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -29,10 +31,11 @@ export const Header = ({ userName, userRole, userInitials }: HeaderProps) => {
   };
 
   return (
-    <header className="bg-background border-b border-border py-3 px-4 flex items-center justify-between">
-      <div className="flex items-center w-full max-w-md">
+    <header className="bg-background border-b border-border py-2 sm:py-3 px-3 sm:px-4 flex items-center justify-between">
+      {/* Search Bar - Hidden on Mobile */}
+      <div className="hidden md:flex items-center w-full max-w-md">
         <div className="relative w-full">
-          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
             placeholder="Search..."
@@ -41,8 +44,15 @@ export const Header = ({ userName, userRole, userInitials }: HeaderProps) => {
         </div>
       </div>
       
-      <div className="flex items-center space-x-4">
-        <Button variant="ghost" size="icon" onClick={toggleTheme}>
+      {/* Mobile Search Button */}
+      <div className="md:hidden">
+        <Button variant="ghost" size="icon">
+          <Search className="h-5 w-5" />
+        </Button>
+      </div>
+      
+      <div className="flex items-center">
+        <Button variant="ghost" size="icon" onClick={toggleTheme} className="hidden sm:flex">
           {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
         </Button>
         
@@ -83,12 +93,12 @@ export const Header = ({ userName, userRole, userInitials }: HeaderProps) => {
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center space-x-2">
+            <Button variant="ghost" className="flex items-center space-x-2 ml-1">
               <Avatar className="h-8 w-8">
                 <AvatarImage src="" />
                 <AvatarFallback>{userInitials}</AvatarFallback>
               </Avatar>
-              <span>{userName}</span>
+              <span className="hidden sm:inline">{userName}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
