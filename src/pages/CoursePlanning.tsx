@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, PlusCircle, Calendar, CheckCircle, AlertCircle, ChevronRight, ChevronDown, BookOpen, X } from "lucide-react";
-import { StudentCourseCard } from "@/components/dashboard/CourseCard";
+import { CourseCard } from "@/components/dashboard/CourseCard";
 import { coursesData, getCompletedCourses, getCurrentCourses, getUpcomingCourses } from "@/data/mockData";
 
 // Types for course plan
@@ -216,7 +215,7 @@ const CoursePlanning = () => {
             <TabsContent value="current" className="pt-2">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {currentCourses.map((course) => (
-                  <StudentCourseCard
+                  <CourseCard
                     key={course.id}
                     code={course.code}
                     title={course.title}
@@ -232,7 +231,7 @@ const CoursePlanning = () => {
             <TabsContent value="upcoming" className="pt-2">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {upcomingCourses.map((course) => (
-                  <StudentCourseCard
+                  <CourseCard
                     key={course.id}
                     code={course.code}
                     title={course.title}
@@ -248,7 +247,7 @@ const CoursePlanning = () => {
             <TabsContent value="completed" className="pt-2">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {completedCourses.map((course) => (
-                  <StudentCourseCard
+                  <CourseCard
                     key={course.id}
                     code={course.code}
                     title={course.title}
