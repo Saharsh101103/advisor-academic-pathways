@@ -10,7 +10,9 @@ import { studentData, advisorData } from "@/data/mockData";
 import { SessionList } from "@/components/advising/SessionList";
 import { SessionDetails } from "@/components/advising/SessionDetails";
 import { ScheduleSessionForm } from "@/components/advising/ScheduleSessionForm";
+import { InfoCard } from "@/components/advising/InfoCard";
 import { AdvisingSession } from "@/types/advising";
+import { formatDate } from "@/utils/dateUtils";
 
 // Mock data for advising sessions
 const mockAdvisingSessions: AdvisingSession[] = [
@@ -64,16 +66,13 @@ const AdvisingSessionsPage = () => {
   const [isSchedulingSession, setIsSchedulingSession] = useState(false);
   const [isCancellingSession, setIsCancellingSession] = useState(false);
   
-  // Form state for new session
   const [newSessionDate, setNewSessionDate] = useState("");
   const [newSessionTime, setNewSessionTime] = useState("");
   const [newSessionReason, setNewSessionReason] = useState("");
   
-  // Filter sessions by status
   const upcomingSessions = sessions.filter(session => session.status === 'scheduled' || session.status === 'requested');
   const pastSessions = sessions.filter(session => session.status === 'completed' || session.status === 'cancelled');
   
-  // Schedule a new session
   const handleScheduleSession = () => {
     const newSession: AdvisingSession = {
       id: `session${sessions.length + 1}`,
@@ -94,7 +93,6 @@ const AdvisingSessionsPage = () => {
     resetNewSessionForm();
   };
   
-  // Cancel a session
   const handleCancelSession = () => {
     if (!selectedSession) return;
     
@@ -110,7 +108,6 @@ const AdvisingSessionsPage = () => {
     setSelectedSession(null);
   };
   
-  // Reset form fields
   const resetNewSessionForm = () => {
     setNewSessionDate("");
     setNewSessionTime("");
@@ -201,39 +198,7 @@ const AdvisingSessionsPage = () => {
         </CardContent>
       </Card>
       
-      {/* Info card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>About Academic Advising</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="flex flex-col items-center text-center p-4 border rounded-md">
-              <Calendar className="h-10 w-10 text-primary mb-3" />
-              <h3 className="font-medium mb-2">Regular Check-ins</h3>
-              <p className="text-sm text-muted-foreground">
-                Meet with your advisor at least once per semester to stay on track with your academic goals.
-              </p>
-            </div>
-            
-            <div className="flex flex-col items-center text-center p-4 border rounded-md">
-              <Calendar className="h-10 w-10 text-primary mb-3" />
-              <h3 className="font-medium mb-2">Course Planning</h3>
-              <p className="text-sm text-muted-foreground">
-                Get guidance on course selection, major requirements, and graduation pathways.
-              </p>
-            </div>
-            
-            <div className="flex flex-col items-center text-center p-4 border rounded-md">
-              <Calendar className="h-10 w-10 text-primary mb-3" />
-              <h3 className="font-medium mb-2">Office Hours</h3>
-              <p className="text-sm text-muted-foreground">
-                Your advisor, {advisorData.name}, is available during office hours: {advisorData.officeHours}.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <InfoCard advisorData={advisorData} />
       
       {/* Session Detail Dialog */}
       <Dialog open={isViewingSession} onOpenChange={setIsViewingSession}>
