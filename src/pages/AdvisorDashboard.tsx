@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { TabsContent, TabsList, TabsTrigger, Tabs } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -68,17 +67,14 @@ const studentAdvisingData = [
 ];
 
 const AdvisorDashboard = () => {
-  const upcomingEvents = getUpcomingEvents().map(event => ({
-    ...event,
-    type: event.type as "class" | "advising" | "deadline"
-  }));
+  const upcomingEvents = getUpcomingEvents();
   const announcements = getRecentAnnouncements();
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Hello, Dr. Johnson</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Hello, Dr. {advisorData.name.split(' ')[1]}</h1>
           <p className="text-muted-foreground">
             {advisorData.department} Department • {advisorData.students.length} Advisees
           </p>

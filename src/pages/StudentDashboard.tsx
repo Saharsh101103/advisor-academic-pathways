@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -13,18 +12,15 @@ import {
   getCurrentCourses, 
   getUpcomingCourses, 
   getUpcomingEvents,
-  getRecentAnnouncements
+  getRecentAnnouncements,
+  Event
 } from "@/data/mockData";
 
 const StudentDashboard = () => {
   const progress = calculateAcademicProgress();
   const currentCourses = getCurrentCourses();
   const upcomingCourses = getUpcomingCourses();
-  // Fix the type issue by explicitly specifying the event type as a valid value
-  const upcomingEvents = getUpcomingEvents().map(event => ({
-    ...event,
-    type: event.type as "class" | "advising" | "deadline"
-  }));
+  const upcomingEvents = getUpcomingEvents();
   const announcements = getRecentAnnouncements();
 
   return (
