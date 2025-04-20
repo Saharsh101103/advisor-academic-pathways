@@ -1,9 +1,8 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckIcon, GraduationCap, XIcon } from "lucide-react";
+import { CheckIcon, GraduationCap } from "lucide-react";
 import { degreeRequirementsData, studentData } from "@/data/mockData";
 
 const AcademicProgress = () => {
@@ -49,18 +48,20 @@ const AcademicProgress = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Academic Progress</h1>
-        <p className="text-muted-foreground">
-          Track your degree requirements and progress towards graduation
-        </p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Academic Progress</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
+            Track your degree requirements and progress towards graduation
+          </p>
+        </div>
       </div>
 
-      {/* Overall Progress */}
+      {/* Overall Progress Card */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center text-xl">
-            <GraduationCap className="mr-2" /> 
+        <CardHeader className="space-y-1">
+          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+            <GraduationCap className="h-5 w-5 sm:h-6 sm:w-6" /> 
             {degreeRequirementsData.major} Degree Progress
           </CardTitle>
           <CardDescription>
@@ -70,7 +71,7 @@ const AcademicProgress = () => {
         <CardContent>
           <Progress value={overallProgress} className="h-2" />
           
-          <div className="mt-8 space-y-6">
+          <div className="mt-6 space-y-4">
             {categories.map((category, index) => {
               const categoryProgress = Math.round(
                 (category.completedCredits / category.requiredCredits) * 100
@@ -78,9 +79,9 @@ const AcademicProgress = () => {
               
               return (
                 <div key={index} className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <h3 className="font-semibold text-md">{category.name}</h3>
-                    <span className="text-sm font-medium">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
+                    <h3 className="font-semibold text-sm sm:text-md">{category.name}</h3>
+                    <span className="text-xs sm:text-sm font-medium">
                       {category.completedCredits} / {category.requiredCredits} credits ({categoryProgress}%)
                     </span>
                   </div>
@@ -92,27 +93,29 @@ const AcademicProgress = () => {
         </CardContent>
       </Card>
 
-      {/* Course Requirements */}
+      {/* Course Requirements Card */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl">Course Requirements</CardTitle>
+          <CardTitle className="text-lg sm:text-xl">Course Requirements</CardTitle>
           <CardDescription>
             Detailed view of all courses required for your {degreeRequirementsData.major} degree
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0 sm:p-6">
           <Tabs defaultValue={categories[0].name.toLowerCase().replace(/\s+/g, "-")}>
-            <TabsList className="mb-4 w-full justify-start overflow-x-auto">
-              {categories.map((category, index) => (
-                <TabsTrigger 
-                  key={index} 
-                  value={category.name.toLowerCase().replace(/\s+/g, "-")}
-                  className="min-w-max"
-                >
-                  {category.name}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            <div className="px-4 sm:px-0">
+              <TabsList className="mb-4 w-full justify-start overflow-x-auto">
+                {categories.map((category, index) => (
+                  <TabsTrigger 
+                    key={index} 
+                    value={category.name.toLowerCase().replace(/\s+/g, "-")}
+                    className="min-w-max text-xs sm:text-sm"
+                  >
+                    {category.name}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
             
             {categories.map((category, index) => (
               <TabsContent 
@@ -121,37 +124,47 @@ const AcademicProgress = () => {
                 className="pt-2"
               >
                 <div className="rounded-md border">
-                  <div className="grid grid-cols-12 gap-4 p-4 font-medium text-sm bg-muted/50">
+                  <div className="hidden sm:grid grid-cols-12 gap-4 p-4 font-medium text-sm bg-muted/50">
                     <div className="col-span-3">Course</div>
                     <div className="col-span-5">Title</div>
                     <div className="col-span-1 text-center">Credits</div>
                     <div className="col-span-3 text-right">Status</div>
                   </div>
                   
-                  {category.courses.map((course, courseIndex) => (
-                    <div 
-                      key={courseIndex} 
-                      className={`grid grid-cols-12 gap-4 p-4 items-center text-sm ${
-                        courseIndex !== category.courses.length - 1 ? "border-b" : ""
-                      } hover:bg-muted/30 transition-colors`}
-                    >
-                      <div className="col-span-3 font-medium">{course.code}</div>
-                      <div className="col-span-5">{course.title}</div>
-                      <div className="col-span-1 text-center">{course.credits}</div>
-                      <div className="col-span-3 text-right">
-                        <Badge variant="outline" className={getBadgeColor(course.status)}>
-                          {course.status === "completed" && <CheckIcon className="mr-1 h-3 w-3" />}
-                          {statusLabels[course.status]}
-                        </Badge>
+                  <div className="divide-y">
+                    {category.courses.map((course, courseIndex) => (
+                      <div 
+                        key={courseIndex} 
+                        className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 p-4 items-center text-sm hover:bg-muted/30 transition-colors"
+                      >
+                        <div className="sm:col-span-3 font-medium flex justify-between sm:block">
+                          <span>{course.code}</span>
+                          <span className="sm:hidden text-muted-foreground">{course.credits} credits</span>
+                        </div>
+                        <div className="sm:col-span-5">{course.title}</div>
+                        <div className="hidden sm:block sm:col-span-1 text-center">{course.credits}</div>
+                        <div className="sm:col-span-3 flex justify-between sm:justify-end items-center">
+                          <span className="text-xs text-muted-foreground sm:hidden">Status:</span>
+                          <Badge variant="outline" className={`${getStatusColor(course.status)} whitespace-nowrap`}>
+                            {course.status === "completed" && <CheckIcon className="mr-1 h-3 w-3" />}
+                            {statusLabels[course.status]}
+                          </Badge>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
                 
-                <div className="mt-4 text-sm text-muted-foreground">
-                  <strong>Required:</strong> {category.requiredCredits} credits &bull; 
-                  <strong className="ml-2">Completed:</strong> {category.completedCredits} credits &bull;
-                  <strong className="ml-2">Remaining:</strong> {category.requiredCredits - category.completedCredits} credits
+                <div className="mt-4 text-xs sm:text-sm text-muted-foreground space-y-1 sm:space-y-0 px-4 sm:px-0">
+                  <div className="sm:inline-block">
+                    <strong>Required:</strong> {category.requiredCredits} credits
+                  </div>
+                  <div className="sm:inline-block sm:mx-4">
+                    <strong>Completed:</strong> {category.completedCredits} credits
+                  </div>
+                  <div className="sm:inline-block">
+                    <strong>Remaining:</strong> {category.requiredCredits - category.completedCredits} credits
+                  </div>
                 </div>
               </TabsContent>
             ))}
@@ -159,8 +172,8 @@ const AcademicProgress = () => {
         </CardContent>
       </Card>
 
-      {/* GPA and Other Academic Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Academic Metrics Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">GPA</CardTitle>
@@ -168,10 +181,10 @@ const AcademicProgress = () => {
           <CardContent>
             <div className="flex items-center justify-center">
               <div className="text-center">
-                <div className="text-4xl font-bold">{studentData.gpa}</div>
+                <div className="text-3xl sm:text-4xl font-bold">{studentData.gpa}</div>
                 <div className="text-sm text-muted-foreground mt-2">of 4.0 scale</div>
                 
-                <div className="mt-6 text-sm">
+                <div className="mt-4 sm:mt-6 text-sm">
                   <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                     <div className="text-muted-foreground">Major GPA:</div>
                     <div className="text-right font-medium">3.8</div>

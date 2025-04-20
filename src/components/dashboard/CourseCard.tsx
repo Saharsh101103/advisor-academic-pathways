@@ -1,7 +1,7 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 
 interface CourseCardProps {
   code: string;
@@ -9,7 +9,7 @@ interface CourseCardProps {
   instructor: string;
   credits: number;
   progress: number;
-  status: "in-progress" | "upcoming" | "completed";
+  status: "completed" | "in-progress" | "upcoming";
 }
 
 export const CourseCard = ({
@@ -18,47 +18,38 @@ export const CourseCard = ({
   instructor,
   credits,
   progress,
-  status,
+  status
 }: CourseCardProps) => {
-  const statusColors = {
-    "in-progress": "bg-blue-100 text-blue-800 border-blue-200",
-    "upcoming": "bg-purple-100 text-purple-800 border-purple-200",
-    "completed": "bg-green-100 text-green-800 border-green-200",
-  };
-
-  const statusLabels = {
-    "in-progress": "In Progress",
-    "upcoming": "Upcoming",
-    "completed": "Completed",
-  };
-
   return (
-    <Card className="h-full">
-      <CardHeader className="pb-2">
+    <Card className="p-4 hover:shadow-md transition-shadow">
+      <div className="flex flex-col space-y-2">
         <div className="flex justify-between items-start">
           <div>
-            <CardTitle className="text-lg font-bold">{title}</CardTitle>
-            <CardDescription className="text-sm mt-1">{code} • {credits} Credits</CardDescription>
+            <h3 className="font-semibold text-sm sm:text-base">{code}</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1">{title}</p>
           </div>
-          <Badge className={statusColors[status]} variant="outline">
-            {statusLabels[status]}
+          <Badge 
+            variant={status === "completed" ? "default" : status === "in-progress" ? "secondary" : "outline"}
+            className="text-xs whitespace-nowrap"
+          >
+            {status === "completed" ? "Completed" : 
+             status === "in-progress" ? "In Progress" : "Upcoming"}
           </Badge>
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-sm text-muted-foreground mb-4">
-          Instructor: {instructor}
+        
+        <div className="text-xs sm:text-sm text-muted-foreground">
+          <span>Prof. {instructor}</span>
+          <span className="mx-2">•</span>
+          <span>{credits} credits</span>
         </div>
+        
         {status === "in-progress" && (
           <div className="space-y-1">
-            <div className="flex justify-between text-xs">
-              <span>Course Progress</span>
-              <span className="font-medium">{progress}%</span>
-            </div>
-            <Progress value={progress} className="h-2" />
+            <Progress value={progress} className="h-1" />
+            <p className="text-xs text-right text-muted-foreground">{progress}% complete</p>
           </div>
         )}
-      </CardContent>
+      </div>
     </Card>
   );
 };

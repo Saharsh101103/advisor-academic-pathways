@@ -10,11 +10,11 @@ interface LayoutProps {
 }
 
 export const Layout = ({ children, userRole }: LayoutProps) => {
-  // Mock user data
-  const userName = userRole === 'student' ? 'Jamie Smith' : 
-                   userRole === 'advisor' ? 'Dr. Alex Johnson' : 'Admin User';
-  const userInitials = userRole === 'student' ? 'JS' : 
-                       userRole === 'advisor' ? 'AJ' : 'AU';
+  // Mock user data with Indian names
+  const userName = userRole === 'student' ? 'Arjun Patel' : 
+                   userRole === 'advisor' ? 'Dr. Priya Sharma' : 'Admin User';
+  const userInitials = userRole === 'student' ? 'AP' : 
+                       userRole === 'advisor' ? 'PS' : 'AU';
   
   const isMobile = useIsMobile();
 
@@ -28,7 +28,7 @@ export const Layout = ({ children, userRole }: LayoutProps) => {
           userRole={userRole} 
           userInitials={userInitials} 
         />
-        <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 bg-background">
           {children}
         </main>
       </div>
