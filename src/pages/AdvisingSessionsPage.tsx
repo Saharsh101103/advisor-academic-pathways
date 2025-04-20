@@ -1,33 +1,16 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, CheckCircle, Clock, FileText, PenLine, Plus, Calendar as CalendarIcon, ChevronRight, X, AlertTriangle, CheckIcon, XIcon } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Calendar, FileText, Plus } from "lucide-react";
 import { studentData, advisorData } from "@/data/mockData";
-
-interface AdvisingSession {
-  id: string;
-  studentId: string;
-  studentName: string;
-  advisorId: string;
-  advisorName: string;
-  date: string;
-  time: string;
-  duration: string;
-  status: 'scheduled' | 'completed' | 'cancelled' | 'requested';
-  notes?: string;
-  location: string;
-  reason: string;
-}
+import { SessionList } from "@/components/advising/SessionList";
+import { SessionDetails } from "@/components/advising/SessionDetails";
+import { ScheduleSessionForm } from "@/components/advising/ScheduleSessionForm";
+import { AdvisingSession } from "@/types/advising";
 
 // Mock data for advising sessions
 const mockAdvisingSessions: AdvisingSession[] = [
@@ -101,7 +84,7 @@ const AdvisingSessionsPage = () => {
       date: newSessionDate,
       time: newSessionTime,
       duration: "30 minutes",
-      status: "requested", // Explicitly using one of the allowed status values
+      status: "requested" as const,
       location: advisorData.office,
       reason: newSessionReason
     };
@@ -133,29 +116,7 @@ const AdvisingSessionsPage = () => {
     setNewSessionTime("");
     setNewSessionReason("");
   };
-  
-  // Format date for display
-  const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
-  };
-  
-  // Get status badge color
-  const getStatusBadge = (status: AdvisingSession['status']) => {
-    switch (status) {
-      case 'scheduled':
-        return <Badge className="bg-blue-100 text-blue-800 border-blue-200" variant="outline">Scheduled</Badge>;
-      case 'completed':
-        return <Badge className="bg-green-100 text-green-800 border-green-200" variant="outline"><CheckIcon className="mr-1 h-3 w-3" />Completed</Badge>;
-      case 'cancelled':
-        return <Badge className="bg-red-100 text-red-800 border-red-200" variant="outline"><XIcon className="mr-1 h-3 w-3" />Cancelled</Badge>;
-      case 'requested':
-        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200" variant="outline">Requested</Badge>;
-      default:
-        return null;
-    }
-  };
-  
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -191,58 +152,17 @@ const AdvisingSessionsPage = () => {
             
             <TabsContent value="upcoming">
               {upcomingSessions.length > 0 ? (
-                <div className="space-y-4">
-                  {upcomingSessions.map((session) => (
-                    <div key={session.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center border rounded-md p-4 hover:bg-muted/50 transition-colors">
-                      <div className="flex items-start gap-3">
-                        <div className="hidden sm:flex h-10 w-10 rounded-full bg-primary/10 items-center justify-center text-primary">
-                          <Calendar className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-medium">{session.reason}</h3>
-                            {getStatusBadge(session.status)}
-                          </div>
-                          <div className="text-sm text-muted-foreground mt-1">
-                            <span>{formatDate(session.date)}</span>
-                            <span className="mx-2">•</span>
-                            <span>{session.time}</span>
-                            <span className="mx-2">•</span>
-                            <span>{session.duration}</span>
-                          </div>
-                          <div className="text-sm mt-1">
-                            <span className="text-muted-foreground">With: </span>
-                            <span>{session.advisorName}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex gap-2 mt-3 sm:mt-0">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => {
-                            setSelectedSession(session);
-                            setIsViewingSession(true);
-                          }}
-                        >
-                          View Details
-                        </Button>
-                        {session.status === 'scheduled' && (
-                          <Button 
-                            variant="destructive" 
-                            size="sm"
-                            onClick={() => {
-                              setSelectedSession(session);
-                              setIsCancellingSession(true);
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <SessionList
+                  sessions={upcomingSessions}
+                  onViewDetails={(session) => {
+                    setSelectedSession(session);
+                    setIsViewingSession(true);
+                  }}
+                  onCancelSession={(session) => {
+                    setSelectedSession(session);
+                    setIsCancellingSession(true);
+                  }}
+                />
               ) : (
                 <div className="text-center py-10">
                   <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
@@ -258,50 +178,17 @@ const AdvisingSessionsPage = () => {
             
             <TabsContent value="past">
               {pastSessions.length > 0 ? (
-                <div className="space-y-4">
-                  {pastSessions.map((session) => (
-                    <div key={session.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center border rounded-md p-4 hover:bg-muted/50 transition-colors">
-                      <div className="flex items-start gap-3">
-                        <div className="hidden sm:flex h-10 w-10 rounded-full bg-primary/10 items-center justify-center text-primary">
-                          {session.status === 'completed' ? (
-                            <CheckCircle className="h-5 w-5" />
-                          ) : (
-                            <X className="h-5 w-5" />
-                          )}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-medium">{session.reason}</h3>
-                            {getStatusBadge(session.status)}
-                          </div>
-                          <div className="text-sm text-muted-foreground mt-1">
-                            <span>{formatDate(session.date)}</span>
-                            <span className="mx-2">•</span>
-                            <span>{session.time}</span>
-                            <span className="mx-2">•</span>
-                            <span>{session.duration}</span>
-                          </div>
-                          <div className="text-sm mt-1">
-                            <span className="text-muted-foreground">With: </span>
-                            <span>{session.advisorName}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex gap-2 mt-3 sm:mt-0">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => {
-                            setSelectedSession(session);
-                            setIsViewingSession(true);
-                          }}
-                        >
-                          View Details
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <SessionList
+                  sessions={pastSessions}
+                  onViewDetails={(session) => {
+                    setSelectedSession(session);
+                    setIsViewingSession(true);
+                  }}
+                  onCancelSession={(session) => {
+                    setSelectedSession(session);
+                    setIsCancellingSession(true);
+                  }}
+                />
               ) : (
                 <div className="text-center py-10">
                   <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
@@ -330,7 +217,7 @@ const AdvisingSessionsPage = () => {
             </div>
             
             <div className="flex flex-col items-center text-center p-4 border rounded-md">
-              <PenLine className="h-10 w-10 text-primary mb-3" />
+              <Calendar className="h-10 w-10 text-primary mb-3" />
               <h3 className="font-medium mb-2">Course Planning</h3>
               <p className="text-sm text-muted-foreground">
                 Get guidance on course selection, major requirements, and graduation pathways.
@@ -338,7 +225,7 @@ const AdvisingSessionsPage = () => {
             </div>
             
             <div className="flex flex-col items-center text-center p-4 border rounded-md">
-              <Clock className="h-10 w-10 text-primary mb-3" />
+              <Calendar className="h-10 w-10 text-primary mb-3" />
               <h3 className="font-medium mb-2">Office Hours</h3>
               <p className="text-sm text-muted-foreground">
                 Your advisor, {advisorData.name}, is available during office hours: {advisorData.officeHours}.
@@ -359,66 +246,15 @@ const AdvisingSessionsPage = () => {
           </DialogHeader>
           
           {selectedSession && (
-            <div className="space-y-4 py-4">
-              <div className="flex justify-between items-center">
-                <h3 className="font-medium text-lg">{selectedSession.reason}</h3>
-                {getStatusBadge(selectedSession.status)}
-              </div>
-              
-              <div className="space-y-3">
-                <div className="flex">
-                  <CalendarIcon className="h-5 w-5 text-muted-foreground mr-3" />
-                  <div>
-                    <div className="font-medium">Date & Time</div>
-                    <div className="text-sm text-muted-foreground">
-                      {formatDate(selectedSession.date)} at {selectedSession.time} ({selectedSession.duration})
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex">
-                  <User className="h-5 w-5 text-muted-foreground mr-3" />
-                  <div>
-                    <div className="font-medium">Advisor</div>
-                    <div className="text-sm text-muted-foreground">{selectedSession.advisorName}</div>
-                  </div>
-                </div>
-                
-                <div className="flex">
-                  <MapPin className="h-5 w-5 text-muted-foreground mr-3" />
-                  <div>
-                    <div className="font-medium">Location</div>
-                    <div className="text-sm text-muted-foreground">{selectedSession.location}</div>
-                  </div>
-                </div>
-              </div>
-              
-              {selectedSession.notes && (
-                <div className="rounded-md border p-3">
-                  <div className="font-medium mb-2">Session Notes</div>
-                  <p className="text-sm whitespace-pre-wrap">{selectedSession.notes}</p>
-                </div>
-              )}
-              
-              {selectedSession.status === 'scheduled' && (
-                <div className="border-t pt-4 mt-4">
-                  <Button 
-                    variant="destructive" 
-                    onClick={() => {
-                      setIsViewingSession(false);
-                      setIsCancellingSession(true);
-                    }}
-                  >
-                    Cancel Session
-                  </Button>
-                </div>
-              )}
-            </div>
+            <SessionDetails
+              session={selectedSession}
+              onClose={() => setIsViewingSession(false)}
+              onCancel={() => {
+                setIsViewingSession(false);
+                setIsCancellingSession(true);
+              }}
+            />
           )}
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsViewingSession(false)}>Close</Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
       
@@ -435,76 +271,21 @@ const AdvisingSessionsPage = () => {
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-4 py-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="date">Date</Label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={newSessionDate}
-                  onChange={(e) => setNewSessionDate(e.target.value)}
-                  min={new Date().toISOString().split('T')[0]}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="time">Time</Label>
-                <Select onValueChange={setNewSessionTime}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select time" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="09:00">9:00 AM</SelectItem>
-                    <SelectItem value="10:00">10:00 AM</SelectItem>
-                    <SelectItem value="11:00">11:00 AM</SelectItem>
-                    <SelectItem value="12:00">12:00 PM</SelectItem>
-                    <SelectItem value="14:00">2:00 PM</SelectItem>
-                    <SelectItem value="15:00">3:00 PM</SelectItem>
-                    <SelectItem value="16:00">4:00 PM</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="reason">Reason for Meeting</Label>
-              <Textarea
-                id="reason"
-                placeholder="Briefly describe the purpose of this meeting..."
-                value={newSessionReason}
-                onChange={(e) => setNewSessionReason(e.target.value)}
-              />
-            </div>
-            
-            <div className="rounded-md bg-muted p-3 text-sm">
-              <div className="font-medium mb-1 flex items-center">
-                <InfoIcon className="h-4 w-4 mr-2 text-muted-foreground" />
-                Advisor Availability
-              </div>
-              <p className="text-muted-foreground">
-                {advisorData.name} is available during these office hours: {advisorData.officeHours}
-              </p>
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setIsSchedulingSession(false);
-                resetNewSessionForm();
-              }}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleScheduleSession}
-              disabled={!newSessionDate || !newSessionTime || !newSessionReason}
-            >
-              Request Session
-            </Button>
-          </DialogFooter>
+          <ScheduleSessionForm
+            newSessionDate={newSessionDate}
+            newSessionTime={newSessionTime}
+            newSessionReason={newSessionReason}
+            onDateChange={setNewSessionDate}
+            onTimeChange={setNewSessionTime}
+            onReasonChange={setNewSessionReason}
+            onCancel={() => {
+              setIsSchedulingSession(false);
+              resetNewSessionForm();
+            }}
+            onSubmit={handleScheduleSession}
+            advisorName={advisorData.name}
+            advisorOfficeHours={advisorData.officeHours}
+          />
         </DialogContent>
       </Dialog>
       
@@ -548,55 +329,5 @@ const AdvisingSessionsPage = () => {
     </div>
   );
 };
-
-// Helper Icon component
-const InfoIcon = ({ className }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <circle cx="12" cy="12" r="10" />
-    <line x1="12" y1="16" x2="12" y2="12" />
-    <line x1="12" y1="8" x2="12.01" y2="8" />
-  </svg>
-);
-
-const User = ({ className }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-    <circle cx="12" cy="7" r="4" />
-  </svg>
-);
-
-const MapPin = ({ className }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-    <circle cx="12" cy="10" r="3" />
-  </svg>
-);
 
 export default AdvisingSessionsPage;
