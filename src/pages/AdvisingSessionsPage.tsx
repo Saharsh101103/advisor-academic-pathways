@@ -1,18 +1,15 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Calendar, FileText, Plus } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Plus } from "lucide-react";
 import { studentData, advisorData } from "@/data/mockData";
-import { SessionList } from "@/components/advising/SessionList";
-import { SessionDetails } from "@/components/advising/SessionDetails";
 import { ScheduleSessionForm } from "@/components/advising/ScheduleSessionForm";
 import { InfoCard } from "@/components/advising/InfoCard";
 import { AdvisingSession } from "@/types/advising";
-import { formatDate } from "@/utils/dateUtils";
+import { SessionTabs } from "@/components/advising/SessionTabs";
+import { ViewSessionDialog } from "@/components/advising/ViewSessionDialog";
+import { CancelSessionDialog } from "@/components/advising/CancelSessionDialog";
 
 // Mock data for advising sessions
 const mockAdvisingSessions: AdvisingSession[] = [
@@ -135,99 +132,42 @@ const AdvisingSessionsPage = () => {
           <CardDescription>View your upcoming and past advising sessions</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="upcoming" className="w-full">
-            <TabsList className="mb-4">
-              <TabsTrigger value="upcoming">
-                Upcoming
-                <Badge className="ml-2" variant="secondary">{upcomingSessions.length}</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="past">
-                Past
-                <Badge className="ml-2" variant="secondary">{pastSessions.length}</Badge>
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="upcoming">
-              {upcomingSessions.length > 0 ? (
-                <SessionList
-                  sessions={upcomingSessions}
-                  onViewDetails={(session) => {
-                    setSelectedSession(session);
-                    setIsViewingSession(true);
-                  }}
-                  onCancelSession={(session) => {
-                    setSelectedSession(session);
-                    setIsCancellingSession(true);
-                  }}
-                />
-              ) : (
-                <div className="text-center py-10">
-                  <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium">No upcoming sessions</h3>
-                  <p className="text-muted-foreground mb-4">Schedule a session with your advisor</p>
-                  <Button onClick={() => setIsSchedulingSession(true)}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Schedule Session
-                  </Button>
-                </div>
-              )}
-            </TabsContent>
-            
-            <TabsContent value="past">
-              {pastSessions.length > 0 ? (
-                <SessionList
-                  sessions={pastSessions}
-                  onViewDetails={(session) => {
-                    setSelectedSession(session);
-                    setIsViewingSession(true);
-                  }}
-                  onCancelSession={(session) => {
-                    setSelectedSession(session);
-                    setIsCancellingSession(true);
-                  }}
-                />
-              ) : (
-                <div className="text-center py-10">
-                  <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium">No past sessions</h3>
-                  <p className="text-muted-foreground">Your completed sessions will appear here</p>
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
+          <SessionTabs
+            upcomingSessions={upcomingSessions}
+            pastSessions={pastSessions}
+            onViewDetails={(session) => {
+              setSelectedSession(session);
+              setIsViewingSession(true);
+            }}
+            onCancelSession={(session) => {
+              setSelectedSession(session);
+              setIsCancellingSession(true);
+            }}
+            onScheduleSession={() => setIsSchedulingSession(true)}
+          />
         </CardContent>
       </Card>
       
       <InfoCard advisorData={advisorData} />
       
-      {/* Session Detail Dialog */}
-      <Dialog open={isViewingSession} onOpenChange={setIsViewingSession}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Advising Session Details</DialogTitle>
-            <DialogDescription>
-              View the details of your advising session
-            </DialogDescription>
-          </DialogHeader>
-          
-          {selectedSession && (
-            <SessionDetails
-              session={selectedSession}
-              onClose={() => setIsViewingSession(false)}
-              onCancel={() => {
-                setIsViewingSession(false);
-                setIsCancellingSession(true);
-              }}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      <ViewSessionDialog
+        open={isViewingSession}
+        onOpenChange={setIsViewingSession}
+        session={selectedSession}
+        onClose={() => setIsViewingSession(false)}
+        onCancel={() => {
+          setIsViewingSession(false);
+          setIsCancellingSession(true);
+        }}
+      />
       
-      {/* Schedule Session Dialog */}
-      <Dialog open={isSchedulingSession} onOpenChange={(open) => {
-        setIsSchedulingSession(open);
-        if (!open) resetNewSessionForm();
-      }}>
+      <Dialog 
+        open={isSchedulingSession} 
+        onOpenChange={(open) => {
+          setIsSchedulingSession(open);
+          if (!open) resetNewSessionForm();
+        }}
+      >
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Schedule Advising Session</DialogTitle>
@@ -254,43 +194,12 @@ const AdvisingSessionsPage = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Cancel Session Alert */}
-      <AlertDialog open={isCancellingSession} onOpenChange={setIsCancellingSession}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Cancel Advising Session</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to cancel this advising session? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          
-          {selectedSession && (
-            <div className="py-4">
-              <div className="rounded-md bg-muted p-3">
-                <div className="text-sm">
-                  <strong>Date:</strong> {formatDate(selectedSession.date)}
-                </div>
-                <div className="text-sm">
-                  <strong>Time:</strong> {selectedSession.time}
-                </div>
-                <div className="text-sm">
-                  <strong>Advisor:</strong> {selectedSession.advisorName}
-                </div>
-                <div className="text-sm">
-                  <strong>Reason:</strong> {selectedSession.reason}
-                </div>
-              </div>
-            </div>
-          )}
-          
-          <AlertDialogFooter>
-            <AlertDialogCancel>No, Keep Session</AlertDialogCancel>
-            <AlertDialogAction onClick={handleCancelSession} className="bg-destructive text-destructive-foreground">
-              Yes, Cancel Session
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <CancelSessionDialog
+        open={isCancellingSession}
+        onOpenChange={setIsCancellingSession}
+        session={selectedSession}
+        onConfirmCancel={handleCancelSession}
+      />
     </div>
   );
 };
