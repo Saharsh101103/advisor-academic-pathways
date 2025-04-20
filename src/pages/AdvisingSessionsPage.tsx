@@ -101,7 +101,7 @@ const AdvisingSessionsPage = () => {
       date: newSessionDate,
       time: newSessionTime,
       duration: "30 minutes",
-      status: "requested",
+      status: "requested", // Explicitly using one of the allowed status values
       location: advisorData.office,
       reason: newSessionReason
     };
@@ -117,7 +117,7 @@ const AdvisingSessionsPage = () => {
     
     const updatedSessions = sessions.map(session => {
       if (session.id === selectedSession.id) {
-        return { ...session, status: 'cancelled' };
+        return { ...session, status: 'cancelled' as const };
       }
       return session;
     });
