@@ -276,7 +276,7 @@ export const degreeRequirementsData = {
           credits: 4,
           status: "completed"
         },
-         {
+        {
           code: "HIS101",
           title: "World History",
           credits: 3,

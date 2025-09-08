@@ -25,6 +25,9 @@ import {
   getUpcomingEvents,
   getRecentAnnouncements,
 } from "@/data/mockData";
+import { getAdvisor, getAdvisorStudents } from "@/api/advisor";
+import { getEvents, getAnnouncements } from "@/api/student";
+import { useQuery } from "@tanstack/react-query";
 
 // Mock student advising data
 const studentAdvisingData = [
@@ -84,21 +87,50 @@ const studentAdvisingData = [
     alerts: ["Low GPA warning", "Missing prerequisites"],
   },
 ];
+const ADVISOR_ID = 1;
 
 const AdvisorDashboard = () => {
-  const upcomingEvents = getUpcomingEvents();
-  const announcements = getRecentAnnouncements();
+  // AdvisorDashboard.tsx
+  const { data: advisors = [] } = useQuery({
+    queryKey: ["advisors"],
+    queryFn: getAdvisors,
+  });
+
+  const advisor = advisors[0]; // assume first advisor = logged in
+
+  const { data: students = [] } = useQuery({
+    queryKey: ["students"],
+    queryFn: getStudents,
+  });
+
+  const advisees = students.filter((s) => s.advisor === advisor.serial_id);
+
+  const { data: events = [] } = useQuery({
+    queryKey: ["events"],
+    queryFn: getEvents,
+  });
+
+  const { data: announcements = [] } = useQuery({
+    queryKey: ["announcements"],
+    queryFn: getAnnouncements,
+  });
+  if (advisorLoading || studentsLoading) return <div>Loading...</div>;
+
+  // derive counts
+  const totalStudents = students.length;
+  const pending = students.filter((s) => !s.nextMeeting).length;
+  const completed = students.filter((s) => s.advisingCompleted).length;
+  const alerts = students.filter((s) => s.alerts && s.alerts.length > 0).length;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            Hello, Dr. {advisorData.name.split(" ")[1]}
+            Hello, Dr. {advisor.name.split(" ")[1]}
           </h1>
           <p className="text-muted-foreground">
-            {advisorData.department} Department • {advisorData.students.length}{" "}
-            Advisees
+            {advisor.department} Department • {advisor.students.length} Advisees
           </p>
         </div>
         <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
@@ -118,9 +150,7 @@ const AdvisorDashboard = () => {
         <Card className="col-span-1 lg:col-span-2">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Student Advising Status</CardTitle>
-            <CardDescription>
-              {studentAdvisingData.length} total students
-            </CardDescription>
+            <CardDescription>{totalStudents} total students</CardDescription>
           </CardHeader>
           <CardContent className="pt-2">
             <Tabs defaultValue="pending">

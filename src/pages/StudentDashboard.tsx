@@ -1,35 +1,81 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, GraduationCap, MessageSquare, BookOpen, AlertTriangle } from "lucide-react";
+import {
+  CalendarIcon,
+  GraduationCap,
+  MessageSquare,
+  BookOpen,
+  AlertTriangle,
+} from "lucide-react";
 import { CourseCard } from "@/components/dashboard/CourseCard";
 import { ProgressRing } from "@/components/dashboard/ProgressRing";
 import { UpcomingEventsCard } from "@/components/dashboard/UpcomingEventsCard";
-import { 
-  studentData, 
-  calculateAcademicProgress, 
-  getCurrentCourses, 
-  getUpcomingCourses, 
-  getUpcomingEvents,
-  getRecentAnnouncements,
-  Event
-} from "@/data/mockData";
+import { studentData } from "@/data/mockData";
+import { useQuery } from "@tanstack/react-query";
+import {
+  getAcademicProgress,
+  getAnnouncements,
+  getEvents,
+  getStudent,
+  getStudentCourses,
+} from "@/api/student";
 
 const StudentDashboard = () => {
-  const progress = calculateAcademicProgress();
-  const currentCourses = getCurrentCourses();
-  const upcomingCourses = getUpcomingCourses();
-  const upcomingEvents = getUpcomingEvents();
-  const announcements = getRecentAnnouncements();
+  const studentId = 2;
 
+  // Fetch student
+  const { data: student, isLoading: studentLoading } = useQuery({
+    queryKey: ["student", studentId],
+    queryFn: () => getStudent(studentId),
+  });
+
+  // Academic progress
+  const { data: progress, isLoading: progressLoading } = useQuery({
+    queryKey: ["academicProgress", studentId],
+    queryFn: () => getAcademicProgress(studentId),
+  });
+
+  // Courses
+  const { data: currentCourses = [] } = useQuery({
+    queryKey: ["courses", studentId, "IN_PROGRESS"],
+    queryFn: () => getStudentCourses(studentId, "IN_PROGRESS"),
+  });
+
+  const { data: upcomingCourses = [] } = useQuery({
+    queryKey: ["courses", studentId, "UPCOMING"],
+    queryFn: () => getStudentCourses(studentId, "UPCOMING"),
+  });
+
+  // Announcements
+  const { data: announcements = [] } = useQuery({
+    queryKey: ["announcements"],
+    queryFn: getAnnouncements,
+  });
+
+  // Events
+  const { data: events = [] } = useQuery({
+    queryKey: ["events"],
+    queryFn: getEvents,
+  });
+
+  if (studentLoading) return <div>Loading...</div>;
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Hello, {studentData.name}</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Hello, {studentData.name}
+          </h1>
           <p className="text-muted-foreground">
-            {studentData.major} • Year {new Date().getFullYear() - studentData.enrollmentYear + 1}
+            {studentData.major} • Year{" "}
+            {new Date().getFullYear() - studentData.enrollmentYear + 1}
           </p>
         </div>
         <div className="flex gap-2 mt-4 md:mt-0">
@@ -53,7 +99,8 @@ const StudentDashboard = () => {
               Academic Progress
             </CardTitle>
             <CardDescription>
-              {studentData.completedCredits} of {studentData.requiredCredits} credits
+              {studentData.completedCredits} of {studentData.requiredCredits}{" "}
+              credits
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-2 flex justify-center">
@@ -71,13 +118,22 @@ const StudentDashboard = () => {
           <CardContent className="pt-2">
             <div className="space-y-4">
               {announcements.map((announcement) => (
-                <div key={announcement.id} className="border-b pb-4 last:border-b-0 last:pb-0">
+                <div
+                  key={announcement.id}
+                  className="border-b pb-4 last:border-b-0 last:pb-0"
+                >
                   <div className="flex justify-between items-start mb-1">
                     <h4 className="font-medium">{announcement.title}</h4>
-                    <span className="text-xs text-muted-foreground">{announcement.date}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {announcement.date}
+                    </span>
                   </div>
-                  <p className="text-sm text-muted-foreground mb-2">{announcement.content}</p>
-                  <div className="text-xs text-right">— {announcement.author}</div>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    {announcement.content}
+                  </p>
+                  <div className="text-xs text-right">
+                    — {announcement.author}
+                  </div>
                 </div>
               ))}
             </div>
@@ -133,7 +189,7 @@ const StudentDashboard = () => {
         </div>
 
         <div className="col-span-1 h-full">
-          <UpcomingEventsCard events={upcomingEvents} />
+          <UpcomingEventsCard events={events} />
         </div>
       </div>
 
@@ -150,29 +206,47 @@ const StudentDashboard = () => {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Credits Complete</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Credits Complete
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{studentData.completedCredits}</div>
-            <p className="text-xs text-muted-foreground">of {studentData.requiredCredits} required</p>
+            <div className="text-2xl font-bold">
+              {studentData.completedCredits}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              of {studentData.requiredCredits} required
+            </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Current Courses</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Current Courses
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{currentCourses.length}</div>
-            <p className="text-xs text-muted-foreground">{currentCourses.reduce((acc, course) => acc + course.credits, 0)} credits</p>
+            <p className="text-xs text-muted-foreground">
+              {currentCourses.reduce((acc, course) => acc + course.credits, 0)}{" "}
+              credits
+            </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Expected Graduation</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Expected Graduation
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">May {studentData.expectedGraduation}</div>
-            <p className="text-xs text-muted-foreground">{studentData.expectedGraduation - new Date().getFullYear()} years remaining</p>
+            <div className="text-2xl font-bold">
+              May {studentData.expectedGraduation}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {studentData.expectedGraduation - new Date().getFullYear()} years
+              remaining
+            </p>
           </CardContent>
         </Card>
       </div>
